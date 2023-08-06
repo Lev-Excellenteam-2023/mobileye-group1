@@ -41,28 +41,35 @@ def gaussian_blur(image: np.ndarray) -> np.ndarray:
     return blurred_image
 
 
-def find_red_coordinates(c_image: np.ndarray) -> np.ndarray:
+
+def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
+    c_image = np.uint8(c_image * 255)
     r_image = c_image[:, :, 0]
     g_image = c_image[:, :, 1]
     b_image = c_image[:, :, 2]
-    new_image = g_image + b_image / 2 - r_image
-    kernel = np.array([[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9]])
-    new_image = sg.convolve(new_image, kernel, mode='same', method='direct')
+    green_image = r_image - b_image / 3 - g_image / 3
 
-    return new_image
+    blurred_image = gaussian_blur(green_image)
 
-
+    return blurred_image / 255
 def find_green_coordinates(c_image: np.ndarray) -> np.ndarray:
 
     r_image = c_image[:, :, 0]
     g_image = c_image[:, :, 1]
     b_image = c_image[:, :, 2]
 
-    new_image = r_image - g_image / 3 - b_image / 3
-    kernel = np.array([[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9]])
-    new_image = sg.convolve(new_image, kernel, mode='same', method='direct')
 
-    return new_image
+def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
+    c_image = np.uint8(c_image * 255)
+    r_image = c_image[:, :, 0]
+    g_image = c_image[:, :, 1]
+    b_image = c_image[:, :, 2]
+    green_image = g_image + b_image / 2 - r_image
+
+    blurred_image = gaussian_blur(green_image)
+
+    return blurred_image / 255
+
 
 def find_traffic_light_kernel() -> np.ndarray:
     kernel = Image.open("green_light_2.png")
