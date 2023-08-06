@@ -1,4 +1,5 @@
 import os.path
+import consts
 from typing import List, Optional, Union, Dict, Tuple
 import json
 import argparse
@@ -40,6 +41,7 @@ def gaussian_blur(image: np.ndarray) -> np.ndarray:
     return blurred_image
 
 
+
 def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
     c_image = np.uint8(c_image * 255)
     r_image = c_image[:, :, 0]
@@ -50,6 +52,11 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
     blurred_image = gaussian_blur(green_image)
 
     return blurred_image / 255
+def find_green_coordinates(c_image: np.ndarray) -> np.ndarray:
+
+    r_image = c_image[:, :, 0]
+    g_image = c_image[:, :, 1]
+    b_image = c_image[:, :, 2]
 
 
 def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
@@ -70,12 +77,15 @@ def find_traffic_light_kernel() -> np.ndarray:
 
     return numpy_kernel
 
+
 def max_suppression(image: np.ndarray, kernel_size: int = 50) -> np.ndarray:
     max_image = maximum_filter(image, size=kernel_size, mode='constant')
     values = compare_max_supression(image, max_image)
     return values
 
-def compare_max_supression(image: np.ndarray, max_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES, GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
+
+def compare_max_supression(image: np.ndarray, max_image: np.ndarray) -> Tuple[
+    RED_X_COORDINATES, RED_Y_COORDINATES, GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
     # return pixels that have same value in both images
     red_x_coordinates = []
     red_y_coordinates = []
@@ -86,9 +96,5 @@ def compare_max_supression(image: np.ndarray, max_image: np.ndarray) -> Tuple[RE
             if image[x][y] == max_image[x][y] and max_image[x][y] > 0.85:
                 green_x_coordinates.append(x)
                 green_y_coordinates.append(y)
-    # see dots on image
-    #plt.imshow(image)
-    #plt.scatter(green_y_coordinates, green_x_coordinates, s=20, color = 'green', marker='x')
-    #plt.show()
-    #plt.clf()
     return red_x_coordinates, red_y_coordinates, green_x_coordinates, green_y_coordinates
+

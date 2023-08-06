@@ -36,12 +36,12 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     :return: Dictionary with at least the following keys: 'x', 'y', 'col', each containing a list (same lengths).
     # Note there are no explicit strings in the code-base. ALWAYS USE A CONSTANT VARIABLE INSTEAD!.
     """
+
     red_image = processing_functions.find_red_coordinates(c_image)
     green_image = processing_functions.find_green_coordinates(c_image)
     red_values = processing_functions.max_suppression(red_image)
     green_values = processing_functions.max_suppression(green_image)
-
-    # Okay... Here's an example of what this function should return. You will write your own of course
+    
     x_red: List[float] = red_values[0]
     y_red: List[float] = red_values[1]
     x_green: List[float] = green_values[0]
@@ -105,13 +105,13 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         plt.plot(tfl_x[~is_red], tfl_y[~is_red], 'g+', markersize=4)
         # Now let's convolve. Cannot convolve a 3D image with a 2D kernel, so I create a 2D image
         # Note: This image is useless for you, so you solve it yourself
+
         #useless_image: np.ndarray = np.std(image, axis=2)  # No. You don't want this line in your code-base
         #highpass_kernel_from_lecture: np.ndarray = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]]) - 1 / 9
         #hp_result: np.ndarray = sg.convolve(useless_image, highpass_kernel_from_lecture, 'same')
         #plt.subplot(212, sharex=ax, sharey=ax)
         #plt.imshow(hp_result)
         plt.scatter(attention_dict['y'],attention_dict['x'] , s=20, color = 'green', marker='x')
-
         plt.title('Some useless image for you')
         plt.suptitle("When you zoom on one, the other zooms too :-)")
 

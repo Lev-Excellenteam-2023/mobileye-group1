@@ -56,3 +56,11 @@ CROP_CSV_NAME: str = 'crop_results.csv'
 # File names (directories to be appended automatically)
 TFLS_CSV: str = 'tfls.csv'
 CSV_OUTPUT_NAME: str = 'results.csv'
+
+#results
+RED_IMAGE_CHANGE: str = DATA_DIR / 'results/red'
+GREEN_IMAGE_CHANGE: str = DATA_DIR / 'results/green'
+RED_IMAGE_CHANGE: str = DATA_DIR / 'results/red'
+RED_IMAGE_CHANGE: str = DATA_DIR / 'results/red'
+RED_IMAGE_CHANGE: str = DATA_DIR / 'results/red'
+
