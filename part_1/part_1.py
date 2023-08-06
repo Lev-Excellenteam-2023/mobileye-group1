@@ -3,12 +3,17 @@ from typing import List, Optional, Union, Dict, Tuple
 import json
 import argparse
 from pathlib import Path
+from scipy.ndimage import gaussian_filter
+
 
 import numpy as np
 from scipy import signal as sg
 from scipy.ndimage import maximum_filter
 from PIL import Image
 import matplotlib.pyplot as plt
+
+import output_functions
+import processing_functions
 
 # if you wanna iterate over multiple files and json, the default source folder name is this.
 DEFAULT_BASE_DIR: str = 'resources/Images_with_traffic_lights/Test Images'
@@ -34,10 +39,10 @@ def find_tfl_lights(c_image: np.ndarray,
     :return: 4-tuple of x_red, y_red, x_green, y_green.
     """
 
-    preprocessed_image = preprocess_image(c_image)
-    show_convolution(c_image, preprocessed_image, kwargs['image_name'])
-    red_coordinates = find_red_coordinates(preprocessed_image)
-    green_coordinates = find_green_coordinates(preprocessed_image)
+    preprocessed_image = processing_functions.preprocess_image(c_image)
+    output_functions.show_convolution(c_image, preprocessed_image, kwargs['image_name'])
+    red_coordinates = processing_functions.find_red_coordinates(preprocessed_image)
+    green_coordinates = processing_functions.find_green_coordinates(preprocessed_image)
     
 
 
@@ -109,9 +114,6 @@ def main(argv=None):
     parser.add_argument('-d', '--dir', type=str, help='Directory to scan images in')
     args = parser.parse_args(argv)
 
-    current_directory = os.getcwd()
-    print("Current Directory:", current_directory)
-
     # If you entered a custom dir to run from or the default dir exist in your project then:
     directory_path: Path = Path(args.dir or DEFAULT_BASE_DIR)
     if directory_path.exists():
@@ -130,49 +132,6 @@ def main(argv=None):
     elif args.image:
         test_find_tfl_lights(args.image)
     plt.show(block=True)
-
-
-def preprocess_image(c_image: np.ndarray) -> np.ndarray:
-    #kernel = gaussian_kernel_3d(21, 1.0)
-    filtered_image = sg.convolve(c_image, [[[-1/9, -1/9, -1/9],[-1/9, -1/9, -1/9],[-1/9, -1/9, -1/9],
-        [-1/9, 1, -1/9],
-        [-1/9, -1/9, -1/9]]], mode='same')
-    new = filtered_image.astype(np.uint8)
-    return new
-
-def gaussian_kernel_3d(kernel_size, sigma):
-    x, y, z = np.mgrid[-kernel_size//2 + 1: kernel_size//2 + 1, -kernel_size//2 + 1: kernel_size//2 + 1, -kernel_size//2 + 1: kernel_size//2 + 1]
-    g = np.exp(-(x**2 + y**2 + z**2) / (2.0 * sigma**2))
-    return g / g.sum()
-
-
-
-def find_red_coordinates(image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
-    pass
-
-def find_green_coordinates(image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
-    pass
-
-def show_convolution(original_image: np.ndarray, convoluted_image: np.ndarray, fig_name: str):
-
-    plt.subplot(1, 2, 1)
-    plt.imshow(original_image)
-
-    plt.title("Normal Image")
-    plt.axis('off')
-
-    # Second subplot - right side
-    plt.subplot(1, 2, 2)
-    plt.imshow(convoluted_image)
-    plt.title("Filtered Image")
-    plt.axis('off')
-
-    plt.show()
-    new_file_name = DEFAULT_TEST_RESULT_FOLDER + os.path.basename(fig_name)[:-4] + '_convolution.png'
-    plt.savefig(new_file_name)
-
-
-
 
 
 if __name__ == '__main__':
