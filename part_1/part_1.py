@@ -41,6 +41,7 @@ def find_tfl_lights(c_image: np.ndarray,
 
     preprocessed_image = processing_functions.preprocess_image(c_image)
     output_functions.show_convolution(c_image, preprocessed_image, kwargs['image_name'])
+    return processing_functions.max_suppression(preprocessed_image)
     red_coordinates = processing_functions.find_red_coordinates(preprocessed_image)
     green_coordinates = processing_functions.find_green_coordinates(preprocessed_image)
     
