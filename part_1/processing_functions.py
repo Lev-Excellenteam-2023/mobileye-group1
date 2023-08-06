@@ -19,29 +19,14 @@ GREEN_Y_COORDINATES = List[int]
 
 def preprocess_image(c_image: np.ndarray) -> np.ndarray:
     # TODO: add preprocessing
-    blurred_image = sg.convolve(c_image, gaussian_kernel_3d(21, 1), mode='same')
-    blurred_image_new = blurred_image.astype("uint32")
-    plt.imshow(blurred_image_new)
+    #blurred_image = gaussian_blur(c_image)
+    kernel = find_traffic_light_kernel()
+    convoluted_image = sg.convolve(c_image, kernel, mode='same', method='fft')
+    image_uint8 = np.uint8(convoluted_image)
+    plt.imshow(image_uint8, cmap='hot')
     plt.show()
 
-    #kernel = Image.open("green_light_1.png")
-    kernel = [[[-4/9, 3/9, 1/9]],
-               [[-6/9, 4/9, 2/9]],
-               [[-4/9, 3/9, 1/9]]]
-    numpy_kernel = np.array(kernel)
-
-
-    normalized_kernel = numpy_kernel / np.sum(numpy_kernel)
-    new_image = sg.convolve(blurred_image, numpy_kernel, mode='same')
-
-    uint8_image = new_image.astype("uint32")
-    plt.imshow(uint8_image, cmap='hot')
-    plt.show()
-
-    green_channel = uint8_image[:, :, 1]  # Green channel is at index 1 (0-based index)
-    thresholded_green = green_channel > 100
-
-    return uint8_image
+    return convoluted_image
 
 
 def gaussian_kernel_3d(kernel_size, sigma):
@@ -49,6 +34,11 @@ def gaussian_kernel_3d(kernel_size, sigma):
               -kernel_size // 2 + 1: kernel_size // 2 + 1]
     g = np.exp(-(x ** 2 + y ** 2 + z ** 2) / (2.0 * sigma ** 2))
     return g / g.sum()
+
+
+def gaussian_blur(image: np.ndarray) -> np.ndarray:
+    blurred_image = sg.convolve(image, gaussian_kernel_3d(21, 1), mode='same')
+    return blurred_image
 
 
 def find_red_coordinates(image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
@@ -59,7 +49,9 @@ def find_green_coordinates(image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREE
     pass
 
 
-def find_traffic_light_kernel(image: np.ndarray) -> np.ndarray:
-    new_image = image[72:148]
-    plt.imshow(new_image)
-    plt.show()
+def find_traffic_light_kernel() -> np.ndarray:
+    kernel = Image.open("green_light_2.png")
+    numpy_kernel = np.array(kernel)
+    normalized_kernel = numpy_kernel / np.sum(numpy_kernel)
+
+    return normalized_kernel
