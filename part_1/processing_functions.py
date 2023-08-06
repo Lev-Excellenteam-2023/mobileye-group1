@@ -18,24 +18,7 @@ GREEN_Y_COORDINATES = List[int]
 
 
 def preprocess_image(c_image: np.ndarray) -> np.ndarray:
-
-    int8_image = np.uint8(c_image * 255)
-    plt.imshow(int8_image)
-    plt.show()
-    c_image = int8_image
-    r_image = c_image[:, :, 0]
-    g_image = c_image[:, :, 1]
-    b_image = c_image[:, :, 2]
-    new_image = g_image + b_image/2 - r_image
-
-    #find minimum value in image
-    min_value = np.min(new_image)
-
-    blurred_image = gaussian_blur(new_image)
-
-
-
-    return blurred_image / 255
+   pass
 
 
 def gaussian_kernel_3d(kernel_size, sigma):
@@ -57,12 +40,28 @@ def gaussian_blur(image: np.ndarray) -> np.ndarray:
     return blurred_image
 
 
-def find_red_coordinates(image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
-    pass
+def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
+    c_image = np.uint8(c_image * 255)
+    r_image = c_image[:, :, 0]
+    g_image = c_image[:, :, 1]
+    b_image = c_image[:, :, 2]
+    green_image = r_image - b_image / 3 - g_image / 3
+
+    blurred_image = gaussian_blur(green_image)
+
+    return blurred_image / 255
 
 
-def find_green_coordinates(image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
-    pass
+def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
+    c_image = np.uint8(c_image * 255)
+    r_image = c_image[:, :, 0]
+    g_image = c_image[:, :, 1]
+    b_image = c_image[:, :, 2]
+    green_image = g_image + b_image / 2 - r_image
+
+    blurred_image = gaussian_blur(green_image)
+
+    return blurred_image / 255
 
 
 def find_traffic_light_kernel() -> np.ndarray:
