@@ -16,6 +16,8 @@ RED_X_COORDINATES = List[int]
 RED_Y_COORDINATES = List[int]
 GREEN_X_COORDINATES = List[int]
 GREEN_Y_COORDINATES = List[int]
+X_COORDINATES = List[int]
+Y_COORDINATES = List[int]
 
 
 def gaussian_kernel_2d(kernel_size, sigma):
@@ -93,7 +95,7 @@ def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GR
 #     return numpy_kernel
 
 
-def max_suppression(image: np.ndarray, min_value: float, kernel_size: int = 50) -> np.ndarray:
+def max_suppression(image: np.ndarray, min_value: float, kernel_size: int = 150) -> np.ndarray:
     """
     Apply non-maximum suppression to an input image.
 
@@ -104,11 +106,11 @@ def max_suppression(image: np.ndarray, min_value: float, kernel_size: int = 50) 
     """
     max_image = maximum_filter(image, size=kernel_size, mode='constant')
     values = compare_max_supression(image, max_image, min_value)
+    values = filter_points(values)
     return values
 
 
-def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: float) -> Tuple[
-    RED_X_COORDINATES, RED_Y_COORDINATES, GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
+def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: float) -> Tuple[X_COORDINATES, Y_COORDINATES]:
     """
     Compare an image with a maximum image and perform suppression based on a threshold.
 
@@ -125,3 +127,10 @@ def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: 
                 x_coordinates.append(x)
                 y_coordinates.append(y)
     return x_coordinates, y_coordinates
+
+def filter_points(values: Tuple[X_COORDINATES, Y_COORDINATES]) -> Tuple[X_COORDINATES, Y_COORDINATES]:
+    values = ([value_0 for value_0, value_1 in zip(values[0], values[1]) if value_0 <= 410],
+              [value_1 for value_0, value_1 in zip(values[0], values[1]) if value_0 <= 410])
+    return values
+
+
