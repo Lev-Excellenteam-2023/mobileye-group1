@@ -1,4 +1,5 @@
 import os.path
+import consts
 from typing import List, Optional, Union, Dict, Tuple
 import json
 import argparse
@@ -39,6 +40,7 @@ def gaussian_blur(image: np.ndarray) -> np.ndarray:
     return blurred_image
 
 
+
 def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
     c_image = np.uint8(c_image * 255)
     r_image = c_image[:, :, 0]
@@ -49,6 +51,11 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
     blurred_image = gaussian_blur(red_image)
 
     return blurred_image / 255
+def find_green_coordinates(c_image: np.ndarray) -> np.ndarray:
+
+    r_image = c_image[:, :, 0]
+    g_image = c_image[:, :, 1]
+    b_image = c_image[:, :, 2]
 
 
 def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
@@ -75,6 +82,7 @@ def max_suppression(image: np.ndarray, min_value: float, kernel_size: int = 50) 
     return values
 
 def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: float) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES, GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
+
     # return pixels that have same value in both images
     x_coordinates = []
     y_coordinates = []
@@ -89,3 +97,5 @@ def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: 
     #plt.show()
     #plt.clf()
     return x_coordinates, y_coordinates
+
+x
