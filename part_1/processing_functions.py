@@ -98,4 +98,4 @@ def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: 
     #plt.clf()
     return x_coordinates, y_coordinates
 
-x
+
