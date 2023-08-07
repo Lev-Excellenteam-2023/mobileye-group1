@@ -104,7 +104,9 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         plt.clf()
         #plt.subplot(211, sharex=ax, sharey=ax)
         plt.imshow(image)
-        plt.title('Original image.. Always try to compare your output to it')
+        #plt.title('Original image.. Always try to compare your output to it')
+        plt.title('Image with detected traffic lights')
+
         plt.plot(tfl_x[is_red], tfl_y[is_red], 'rx', markersize=4)
         plt.plot(tfl_x[~is_red], tfl_y[~is_red], 'g+', markersize=4)
         # Now let's convolve. Cannot convolve a 3D image with a 2D kernel, so I create a 2D image
@@ -115,9 +117,14 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         #hp_result: np.ndarray = sg.convolve(useless_image, highpass_kernel_from_lecture, 'same')
         #plt.subplot(212, sharex=ax, sharey=ax)
         #plt.imshow(hp_result)
-        plt.scatter(attention_dict['y'],attention_dict['x'] , s=20, color = 'green', marker='x')
-        plt.title('Some useless image for you')
-        plt.suptitle("When you zoom on one, the other zooms too :-)")
+        # scatter only green light
+
+        plt.scatter(attention_dict['y'],attention_dict['x'] , s=20, color = attention_dict["color"], marker='x')
+        #plt.title('Some useless image for you')
+        #plt.suptitle("When you zoom on one, the other zooms too :-)")
+
+        file_name = row[IMAG_PATH].split('/')[-1]
+        plt.savefig('./Test Results/' + file_name + '.png')
 
     return attention
 
