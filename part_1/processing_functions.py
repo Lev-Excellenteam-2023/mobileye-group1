@@ -61,7 +61,7 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
 
     for i in range(r_image.shape[0]):
         for j in range(r_image.shape[1]):
-            if g_image[i][j] < 0.7 * r_image[i][j] and b_image[i][j] < 0.6 * r_image[i][j] and g_image[i][j] > 0.4 * r_image[i][j] and b_image[i][j] > 0.4 * r_image[i][j]:
+            if g_image[i][j] < 0.8 * r_image[i][j] and b_image[i][j] < 0.8 * r_image[i][j] and g_image[i][j] > 0.35 * r_image[i][j] and b_image[i][j] > 0.35 * r_image[i][j]:
                 red_image[i][j] = r_image[i][j] - g_image[i][j] / 3 - b_image[i][j] / 4
 
     blurred_image = gaussian_blur(red_image)
@@ -142,3 +142,27 @@ def filter_points(values: Tuple[X_COORDINATES, Y_COORDINATES]) -> Tuple[X_COORDI
     return values
 
 
+def filter_green_points(c_image: np.ndarray, values: Tuple[X_COORDINATES, Y_COORDINATES]) -> Tuple[X_COORDINATES, Y_COORDINATES]:
+    """
+        Filter points based on conditions involving color channels.
+
+        :param c_image: Input RGB image as a numpy array.
+        :param values: Tuple of x-coordinates and y-coordinates.
+        :return: Tuple of filtered x-coordinates and y-coordinates.
+        """
+    c_image = np.uint8(c_image * 255)
+    r_image = c_image[:, :, 0]
+    g_image = c_image[:, :, 1]
+    b_image = c_image[:, :, 2]
+    new_values = ([], [])
+    for i in range(len(values[0])):
+        x = values[0][i]
+        y = values[1][i]
+
+        if r_image[x][y] < 0.8 * g_image[x][y] and r_image[x][y] < 0.8 * b_image[x][y]:
+            new_values[0].append(x)
+            new_values[1].append(y)
+
+    # return ([value_0 for value_0, value_1 in zip(values[0], values[1]) if r_image[value_0][value_1] > 0.8 * g_image[value_0][value_1] or r_image[value_0][value_1] > 0.8 * b_image[value_0][value_1]],
+    #           [value_1 for value_0, value_1 in zip(values[0], values[1]) if r_image[value_0][value_1] > 0.8 * g_image[value_0][value_1] or r_image[value_0][value_1] > 0.8 * b_image[value_0][value_1]])
+    return new_values

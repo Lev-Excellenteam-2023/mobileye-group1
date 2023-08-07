@@ -44,8 +44,9 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # plt.show()
     # plt.imshow(green_image)
     # plt.show()
-    red_values = processing_functions.max_suppression(red_image, 0.47)
+    red_values = processing_functions.max_suppression(red_image, 0.27)
     green_values = processing_functions.max_suppression(green_image, 0.668)
+    green_values = processing_functions.filter_green_points(c_image, green_values)
 
     x_red: List[float] = red_values[0]
     y_red: List[float] = red_values[1]
