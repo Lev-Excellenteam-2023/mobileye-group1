@@ -45,7 +45,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # plt.imshow(green_image)
     # plt.show()
     red_values = processing_functions.max_suppression(red_image, 0.47)
-    green_values = processing_functions.max_suppression(green_image, 0.65)
+    green_values = processing_functions.max_suppression(green_image, 0.668)
 
     x_red: List[float] = red_values[0]
     y_red: List[float] = red_values[1]
@@ -106,8 +106,8 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         #plt.title('Original image.. Always try to compare your output to it')
         plt.title('Image with detected traffic lights')
 
-        plt.plot(tfl_x[is_red], tfl_y[is_red], 'rx', markersize=4)
-        plt.plot(tfl_x[~is_red], tfl_y[~is_red], 'g+', markersize=4)
+        # plt.plot(tfl_x[is_red], tfl_y[is_red], 'rx', markersize=4)
+        # plt.plot(tfl_x[~is_red], tfl_y[~is_red], 'g+', markersize=4)
         # Now let's convolve. Cannot convolve a 3D image with a 2D kernel, so I create a 2D image
         # Note: This image is useless for you, so you solve it yourself
 
@@ -123,7 +123,7 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         #plt.suptitle("When you zoom on one, the other zooms too :-)")
 
         file_name = row[IMAG_PATH].split('/')[-1]
-        plt.savefig('./Test Results/' + file_name + '.png')
+        plt.savefig('./Test Results/' + file_name)
 
     return attention
 
