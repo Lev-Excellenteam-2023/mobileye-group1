@@ -43,7 +43,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # plt.show()
     # plt.imshow(green_image)
     # plt.show()
-    red_values = processing_functions.max_suppression(red_image, 0.5)
+    red_values = processing_functions.max_suppression(red_image, 0.47)
     green_values = processing_functions.max_suppression(green_image, 0.65)
 
     x_red: List[float] = red_values[0]
@@ -92,8 +92,9 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
     tfl_y: np.ndarray = attention[Y].values
     color: np.ndarray = attention[COLOR].values
     is_red = color == RED
+    count_red = attention_dict[COLOR].count('r')
 
-    print(f"Image: {image_path}, {is_red.sum()} reds, {len(is_red) - is_red.sum()} greens..")
+    print(f"Image: {image_path}, {count_red} reds, {len(is_red) - count_red} greens..")
 
     if args.debug:
         # And here are some tips & tricks regarding matplotlib
