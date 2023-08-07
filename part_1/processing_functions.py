@@ -35,7 +35,6 @@ def gaussian_kernel_2d(kernel_size, sigma):
 
 def gaussian_blur(image: np.ndarray) -> np.ndarray:
     blurred_image = sg.convolve(image, gaussian_kernel_2d(7, 1), mode='same', method='fft')
-    image_uint8 = np.uint8(blurred_image)
 
     return blurred_image
 
@@ -45,9 +44,9 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
     r_image = c_image[:, :, 0]
     g_image = c_image[:, :, 1]
     b_image = c_image[:, :, 2]
-    green_image = r_image - b_image / 3 - g_image / 3
+    red_image = r_image - b_image / 3 - g_image / 3
 
-    blurred_image = gaussian_blur(green_image)
+    blurred_image = gaussian_blur(red_image)
 
     return blurred_image / 255
 
@@ -70,25 +69,23 @@ def find_traffic_light_kernel() -> np.ndarray:
 
     return numpy_kernel
 
-def max_suppression(image: np.ndarray, kernel_size: int = 50) -> np.ndarray:
+def max_suppression(image: np.ndarray, min_value: float, kernel_size: int = 50) -> np.ndarray:
     max_image = maximum_filter(image, size=kernel_size, mode='constant')
-    values = compare_max_supression(image, max_image)
+    values = compare_max_supression(image, max_image, min_value)
     return values
 
-def compare_max_supression(image: np.ndarray, max_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES, GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
+def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: float) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES, GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
     # return pixels that have same value in both images
-    red_x_coordinates = []
-    red_y_coordinates = []
-    green_x_coordinates = []
-    green_y_coordinates = []
+    x_coordinates = []
+    y_coordinates = []
     for x in range(image.shape[0]):
         for y in range(image.shape[1]):
-            if image[x][y] == max_image[x][y] and max_image[x][y] > 0.85:
-                green_x_coordinates.append(x)
-                green_y_coordinates.append(y)
+            if image[x][y] == max_image[x][y] and max_image[x][y] > min_value:
+                x_coordinates.append(x)
+                y_coordinates.append(y)
     # see dots on image
     #plt.imshow(image)
     #plt.scatter(green_y_coordinates, green_x_coordinates, s=20, color = 'green', marker='x')
     #plt.show()
     #plt.clf()
-    return red_x_coordinates, red_y_coordinates, green_x_coordinates, green_y_coordinates
+    return x_coordinates, y_coordinates

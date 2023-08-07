@@ -36,10 +36,15 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     :return: Dictionary with at least the following keys: 'x', 'y', 'col', each containing a list (same lengths).
     # Note there are no explicit strings in the code-base. ALWAYS USE A CONSTANT VARIABLE INSTEAD!.
     """
+
     red_image = processing_functions.find_red_coordinates(c_image)
     green_image = processing_functions.find_green_coordinates(c_image)
-    red_values = processing_functions.max_suppression(red_image)
-    green_values = processing_functions.max_suppression(green_image)
+    # plt.imshow(red_image)
+    # plt.show()
+    # plt.imshow(green_image)
+    # plt.show()
+    red_values = processing_functions.max_suppression(red_image, 0.5)
+    green_values = processing_functions.max_suppression(green_image, 0.65)
 
     # Okay... Here's an example of what this function should return. You will write your own of course
     x_red: List[float] = red_values[0]
