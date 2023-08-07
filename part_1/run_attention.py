@@ -10,7 +10,8 @@ from matplotlib.axes import Axes
 
 # Internal imports... Should not fail
 from consts import IMAG_PATH, JSON_PATH, NAME, SEQ_IMAG, X, Y, COLOR, RED, GRN, DATA_DIR, TFLS_CSV, CSV_OUTPUT, \
-    SEQ, CROP_DIR, CROP_CSV_NAME, ATTENTION_RESULT, ATTENTION_CSV_NAME, ZOOM, RELEVANT_IMAGE_PATH, COL, ATTENTION_PATH
+    SEQ, CROP_DIR, CROP_CSV_NAME, ATTENTION_RESULT, ATTENTION_CSV_NAME, ZOOM, RELEVANT_IMAGE_PATH, COL, ATTENTION_PATH, \
+    CSV_INPUT
 from misc_goodies import show_image_and_gt
 from data_utils import get_images_metadata
 from crops_creator import create_crops
@@ -69,7 +70,6 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
     image_path: str = row[IMAG_PATH]
     json_path: str = row[JSON_PATH]
     image: np.ndarray = np.array(Image.open(image_path), dtype=np.float32) / 255
-
     if args.debug and json_path is not None:
         # This code-base demonstrates the fact you can read the bounding polygons from the json files
         # Then plot them on the image. Try it if you think you want to. Not a must...
@@ -79,23 +79,21 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         ax: Optional[Axes] = show_image_and_gt(image, objects, f"{row[SEQ_IMAG]}: {row[NAME]} GT")
     else:
         ax = None
-
     # In case you want, you can pass any parameter to find_tfl_lights, because it uses **kwargs
     attention_dict: Dict[str, Any] = find_tfl_lights(image, some_threshold=42, debug=args.debug)
     attention: DataFrame = pd.DataFrame(attention_dict)
-
     # Copy all image metadata from the row into the results, so we can track it later
     for k, v in row.items():
         attention[k] = v
-
     tfl_x: np.ndarray = attention[X].values
     tfl_y: np.ndarray = attention[Y].values
     color: np.ndarray = attention[COLOR].values
     is_red = color == RED
-    count_red = attention_dict[COLOR].count('r')
+    is_green = color == GRN
+    red_amount = attention_dict["color"].count("r")
+    green_amount = attention_dict["color"].count("g")
 
-    print(f"Image: {image_path}, {count_red} reds, {len(is_red) - count_red} greens..")
-
+    print(f"Image: {image_path}, {red_amount} reds, {green_amount} greens..")
     if args.debug:
         # And here are some tips & tricks regarding matplotlib
         # They will look like pictures if you use jupyter, and like magic if you use pycharm!
@@ -146,7 +144,7 @@ def prepare_list(in_csv_file: Path, args: Namespace) -> DataFrame:
     csv_list: DataFrame = get_images_metadata(in_csv_file,
                                               max_count=args.count,
                                               take_specific=args.image)
-    return pd.concat([pd.DataFrame(columns=CSV_OUTPUT), csv_list], ignore_index=True)
+    return pd.concat([pd.DataFrame(columns=CSV_INPUT), csv_list], ignore_index=True)
 
 
 def run_on_list(meta_table: pd.DataFrame, func: callable, args: Namespace) -> pd.DataFrame:
