@@ -37,6 +37,9 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     :return: Dictionary with at least the following keys: 'x', 'y', 'col', each containing a list (same lengths).
     # Note there are no explicit strings in the code-base. ALWAYS USE A CONSTANT VARIABLE INSTEAD!.
     """
+    c_image = c_image[:410, : :]
+    # plt.imshow(c_image)
+    # plt.show()
 
     red_image = processing_functions.find_red_coordinates(c_image)
     green_image = processing_functions.find_green_coordinates(c_image)
@@ -44,7 +47,8 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # plt.show()
     # plt.imshow(green_image)
     # plt.show()
-    red_values = processing_functions.max_suppression(red_image, 0.47, kernel_size =  90)
+    red_values = processing_functions.max_suppression(red_image, 047, kernel_size =  90)
+    #red_values = processing_functions.filter_red_points(c_image, red_values)
     green_values = processing_functions.max_suppression(green_image, 0.668)
     green_values = processing_functions.filter_green_points(c_image, green_values)
 
