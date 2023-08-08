@@ -169,7 +169,7 @@ def filter_green_points(c_image: np.ndarray, values: Tuple[X_COORDINATES, Y_COOR
         x = values[0][i]
         y = values[1][i]
 
-        if r_image[x][y] < 0.4 * g_image[x][y]:
+        if r_image[x][y] < 0.8 * g_image[x][y] and r_image[x][y] < 0.8 * b_image[x][y]:
             new_values[0].append(x)
             new_values[1].append(y)
 
