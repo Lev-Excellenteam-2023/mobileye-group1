@@ -68,8 +68,11 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
                 if 3 < i < r_image.shape[0] - 3 and 3 < j < r_image.shape[1] - 3:
                     for a in range(i - 2, i + 2):
                         for b in range(j - 2, j + 2):
-                            if red_image[i][j] == 0 and r_image[a][b] > 0.8 and g_image[a][b] > 0.8 and b_image[a][b] > 0.8:
-                                red_image[a][b] = (r_image[a][b] - g_image[a][b] / 3 - b_image[a][b] / 4) * 0.6
+                            if r_image[a][b] > 0.7 and g_image[a][b] > 0.6 and b_image[a][b] > 0.6:
+                                red_image[a][b] = (r_image[a][b] - g_image[a][b] / 3 - b_image[a][b] / 4)
+
+    plt.imshow(red_image)
+    plt.show()
 
 
     blurred_image = gaussian_blur(red_image)
