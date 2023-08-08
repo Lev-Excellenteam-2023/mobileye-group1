@@ -10,7 +10,8 @@ from matplotlib.axes import Axes
 
 # Internal imports... Should not fail
 from consts import IMAG_PATH, JSON_PATH, NAME, SEQ_IMAG, X, Y, COLOR, RED, GRN, DATA_DIR, TFLS_CSV, CSV_OUTPUT, \
-    SEQ, CROP_DIR, CROP_CSV_NAME, ATTENTION_RESULT, ATTENTION_CSV_NAME, ZOOM, RELEVANT_IMAGE_PATH, COL, ATTENTION_PATH
+    SEQ, CROP_DIR, CROP_CSV_NAME, ATTENTION_RESULT, ATTENTION_CSV_NAME, ZOOM, RELEVANT_IMAGE_PATH, COL, ATTENTION_PATH, \
+    CSV_INPUT
 from misc_goodies import show_image_and_gt
 from data_utils import get_images_metadata
 from crops_creator import create_crops
@@ -36,6 +37,9 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     :return: Dictionary with at least the following keys: 'x', 'y', 'col', each containing a list (same lengths).
     # Note there are no explicit strings in the code-base. ALWAYS USE A CONSTANT VARIABLE INSTEAD!.
     """
+    c_image = c_image[:410, : :]
+    # plt.imshow(c_image)
+    # plt.show()
 
     red_image = processing_functions.find_red_coordinates(c_image)
     green_image = processing_functions.find_green_coordinates(c_image)
@@ -43,8 +47,10 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # plt.show()
     # plt.imshow(green_image)
     # plt.show()
-    red_values = processing_functions.max_suppression(red_image, 0.47)
-    green_values = processing_functions.max_suppression(green_image, 0.65)
+    red_values = processing_functions.max_suppression(red_image, 0.25, kernel_size =  90)
+    #red_values = processing_functions.filter_red_points(c_image, red_values)
+    green_values = processing_functions.max_suppression(green_image, 0.7)
+    green_values = processing_functions.filter_green_points(c_image, green_values)
 
     x_red: List[float] = red_values[0]
     y_red: List[float] = red_values[1]
@@ -69,7 +75,6 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
     image_path: str = row[IMAG_PATH]
     json_path: str = row[JSON_PATH]
     image: np.ndarray = np.array(Image.open(image_path), dtype=np.float32) / 255
-
     if args.debug and json_path is not None:
         # This code-base demonstrates the fact you can read the bounding polygons from the json files
         # Then plot them on the image. Try it if you think you want to. Not a must...
@@ -79,23 +84,21 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         ax: Optional[Axes] = show_image_and_gt(image, objects, f"{row[SEQ_IMAG]}: {row[NAME]} GT")
     else:
         ax = None
-
     # In case you want, you can pass any parameter to find_tfl_lights, because it uses **kwargs
     attention_dict: Dict[str, Any] = find_tfl_lights(image, some_threshold=42, debug=args.debug)
     attention: DataFrame = pd.DataFrame(attention_dict)
-
     # Copy all image metadata from the row into the results, so we can track it later
     for k, v in row.items():
         attention[k] = v
-
     tfl_x: np.ndarray = attention[X].values
     tfl_y: np.ndarray = attention[Y].values
     color: np.ndarray = attention[COLOR].values
     is_red = color == RED
-    count_red = attention_dict[COLOR].count('r')
+    is_green = color == GRN
+    red_amount = attention_dict["color"].count("r")
+    green_amount = attention_dict["color"].count("g")
 
-    print(f"Image: {image_path}, {count_red} reds, {len(is_red) - count_red} greens..")
-
+    print(f"Image: {image_path}, {red_amount} reds, {green_amount} greens..")
     if args.debug:
         # And here are some tips & tricks regarding matplotlib
         # They will look like pictures if you use jupyter, and like magic if you use pycharm!
@@ -108,8 +111,8 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         #plt.title('Original image.. Always try to compare your output to it')
         plt.title('Image with detected traffic lights')
 
-        plt.plot(tfl_x[is_red], tfl_y[is_red], 'rx', markersize=4)
-        plt.plot(tfl_x[~is_red], tfl_y[~is_red], 'g+', markersize=4)
+        # plt.plot(tfl_x[is_red], tfl_y[is_red], 'rx', markersize=4)
+        # plt.plot(tfl_x[~is_red], tfl_y[~is_red], 'g+', markersize=4)
         # Now let's convolve. Cannot convolve a 3D image with a 2D kernel, so I create a 2D image
         # Note: This image is useless for you, so you solve it yourself
 
@@ -125,7 +128,7 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         #plt.suptitle("When you zoom on one, the other zooms too :-)")
 
         file_name = row[IMAG_PATH].split('/')[-1]
-        plt.savefig('./Test Results/' + file_name + '.png')
+        plt.savefig('./Test Results/' + file_name)
 
     return attention
 
@@ -146,7 +149,7 @@ def prepare_list(in_csv_file: Path, args: Namespace) -> DataFrame:
     csv_list: DataFrame = get_images_metadata(in_csv_file,
                                               max_count=args.count,
                                               take_specific=args.image)
-    return pd.concat([pd.DataFrame(columns=CSV_OUTPUT), csv_list], ignore_index=True)
+    return pd.concat([pd.DataFrame(columns=CSV_INPUT), csv_list], ignore_index=True)
 
 
 def run_on_list(meta_table: pd.DataFrame, func: callable, args: Namespace) -> pd.DataFrame:
