@@ -13,38 +13,44 @@ def find_center_and_radius(cropped_image):
     :param cropped_image: Input cropped image as a numpy array.
     :return: Tuple containing center and radius of the circle.
     """
-    # cropped_image_1d = cropped_image.reshape(-1, 1)
-    #
-    # num_clusters = 2
-    # kmeans = sklearn.cluster.KMeans(n_clusters=num_clusters, random_state=0).fit(cropped_image_1d)
-    # cluster_centers = kmeans.cluster_centers_
-    # labels = kmeans.labels_
-    # plt.scatter(cropped_image_1d, labels, c=labels, cmap='rainbow')
-    # plt.scatter(cluster_centers, np.arange(num_clusters), marker='x', s=200, linewidths=3, color='black')
-    # plt.show()
-    #
-    # # Choose the cluster with the highest amount of points
-    # cluster = np.argmin(np.bincount(labels))
-    #
-    # # Find the center and radius of the circle
-    # # sum of all points in the cluster divided by the number of points in the cluster
-    # center = np.sum(cluster_centers[cluster]) / len(cluster_centers[cluster])
 
-    # Find the center and radius of the circle
     contoured_image = np.uint8(cropped_image * 255)
     contours, hierarchy = cv2.findContours(contoured_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     contoured_canvas = np.zeros_like(contoured_image, dtype=np.uint8)
     cv2.drawContours(contoured_canvas, contours, -1, (255, 255, 255), 1)  # Draw all contours in white
 
-    # Display the image with contours using plt.imshow()
-    plt.imshow(contoured_canvas, cmap='gray')  # 'gray' colormap for grayscale images
+    # find the most circular contour
+    circularity = []
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        perimeter = cv2.arcLength(contour, True)
+        if 5000 > area > 10:
+            circularity.append(4 * np.pi * area / (perimeter ** 2))
 
-    # Add a title if desired
-    plt.title("Image with Contours")
+    circularity = np.array(circularity)
+    if len(circularity) == 0:
+        # return center of image and radius 20
+        return (cropped_image.shape[0] // 2, cropped_image.shape[1] // 2), 20
+    circular_contour = contours[np.argmax(circularity)]
 
-    # Show the plot
+    # Draw the most circular contour in white
+    contoured_canvas = np.zeros_like(contoured_image, dtype=np.uint8)
+    cv2.drawContours(contoured_canvas, [circular_contour], -1, (255, 255, 255), 1)
+
+    # Find the center and radius of the circle
+    (x, y), radius = cv2.minEnclosingCircle(circular_contour)
+
+    # the following code is for visualization purposes only
+    center = (int(x), int(y))
+    radius = int(radius)
+    new_image = np.zeros_like(contoured_image, dtype=np.uint8)
+    cv2.circle(new_image, center, radius, (255, 0, 0), 1)
+    plt.imshow(new_image, cmap='gray')
+    plt.title("Circle Center and Radius")
     plt.show()
+
+    return (int(x), int(y)), int(radius)
 
 
 def big_crop(image: np.ndarray, value: tuple, color: str) -> np.ndarray:
