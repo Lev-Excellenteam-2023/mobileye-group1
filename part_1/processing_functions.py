@@ -59,17 +59,18 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
     b_image = c_image[:, :, 2]
     red_image = np.zeros((r_image.shape[0], r_image.shape[1]))
 
-    take_red = 0
-
     for i in range(r_image.shape[0]):
         for j in range(r_image.shape[1]):
-            if take_red > 0:
-                red_image[i][j] = r_image[i][j] - g_image[i][j] / 3 - b_image[i][j] / 4
-                take_red -= 1
             if (0.8 * r_image[i][j] > g_image[i][j] > 0.4 * r_image[i][j] and 0.7 * r_image[i][j] > b_image[i][j] > 0.4 * \
                     r_image[i][j]):
                 red_image[i][j] = r_image[i][j] - g_image[i][j] / 3 - b_image[i][j] / 4
-                take_red = 3
+                # check pixels around this point, if they are white, and not included in red_image, add them
+                if 3 < i < r_image.shape[0] - 3 and 3 < j < r_image.shape[1] - 3:
+                    for a in range(i - 2, i + 2):
+                        for b in range(j - 2, j + 2):
+
+                            if r_image[a][b] > 0.7 and g_image[a][b] > 0.6 and b_image[a][b] > 0.6:
+                                red_image[a][b] = (r_image[a][b] - g_image[a][b] / 3 - b_image[a][b] / 4)
 
 
     blurred_image = gaussian_blur(red_image)
@@ -91,16 +92,17 @@ def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GR
     b_image = c_image[:, :, 2]
     green_image = 1.5 * g_image + b_image / 2 - 1.5 * r_image
 
-    kernel = np.array([[1 / 49, 1 / 49, 1 / 49, 1 / 49, 1 / 49, 1/49, 1/49],
-                       [1 / 49, 1 / 49, 1 / 49, 1 / 49, 1 / 49, 1/49, 1/49],
-                       [1 / 49, 1 / 49, 1 / 49, 1 / 49, 1 / 49, 1/49, 1/49],
-                       [1 / 49, 1 / 49, 1 / 49, 1 / 49, 1 / 49, 1/49, 1/49],
-                       [1 / 49, 1 / 49, 1 / 49, 1 / 49, 1 / 49, 1/49, 1/49],
-                       [1 / 49, 1 / 49, 1 / 49, 1 / 49, 1 / 49, 1/49, 1/49],
-                       [1 / 49, 1 / 49, 1 / 49, 1 / 49, 1 / 49, 1/49, 1/49]])
+    kernel = np.array([[1/25, 1/25, 1 / 25, 1/25, 1/25],
+                       [1/25, 1/25, 1 / 25, 1/25, 1/25],
+                       [1/25, 1/25, 1 / 25, 1/25, 1/25],
+                       [1/25, 1/25, 1 / 25, 1/25, 1/25],
+                       [1/25, 1/25, 1 / 25, 1/25, 1/25]])
+
+
 
     blurred_image = sg.convolve(green_image, kernel, mode='same', method='direct')
-    # blurred_image = gaussian_blur(green_image)
+
+    #blurred_image = gaussian_blur(green_image)
 
     return blurred_image / 255
 
@@ -168,7 +170,7 @@ def filter_green_points(c_image: np.ndarray, values: Tuple[X_COORDINATES, Y_COOR
         x = values[0][i]
         y = values[1][i]
 
-        if r_image[x][y] < 0.8 * g_image[x][y] and r_image[x][y] < 0.8 * b_image[x][y]:
+        if b_image[x][y] <= g_image[x][y] and r_image[x][y] <= g_image[x][y]:
             new_values[0].append(x)
             new_values[1].append(y)
 
