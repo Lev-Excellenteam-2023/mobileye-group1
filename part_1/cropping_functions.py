@@ -14,12 +14,20 @@ def find_center_and_radius(cropped_image):
     cropped_image_1d = cropped_image.reshape(-1, 1)
 
     num_clusters = 2
-    kmeans = sklearn.cluster.KMeans(n_clusters=num_clusters, random_state=0).fit(cropped_image_1d.reshape(-1, 1))
+    kmeans = sklearn.cluster.KMeans(n_clusters=num_clusters, random_state=0).fit(cropped_image_1d)
     cluster_centers = kmeans.cluster_centers_
     labels = kmeans.labels_
     plt.scatter(cropped_image_1d, labels, c=labels, cmap='rainbow')
     plt.scatter(cluster_centers, np.arange(num_clusters), marker='x', s=200, linewidths=3, color='black')
     plt.show()
+
+    # Choose the cluster with the highest amount of points
+    cluster = np.argmin(np.bincount(labels))
+
+    # Find the center and radius of the circle
+    # sum of all points in the cluster divided by the number of points in the cluster
+    center = np.sum(cluster_centers[cluster]) / len(cluster_centers[cluster])
+
 
 def big_crop(image: np.ndarray, value:tuple, color: str) -> np.ndarray:
     """
