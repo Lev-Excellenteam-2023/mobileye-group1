@@ -21,13 +21,15 @@ def find_center_and_radius(cropped_image):
 
     contoured_canvas = np.zeros_like(contoured_image, dtype=np.uint8)
     cv2.drawContours(contoured_canvas, contours, -1, (255, 255, 255), 1)  # Draw all contours in white
+    plt.imshow(contoured_canvas)
+    plt.show()
 
     # find the most circular contour
     circularity = []
     for contour in contours:
         area = cv2.contourArea(contour)
         perimeter = cv2.arcLength(contour, True)
-        if 10000 > area > 5:
+        if 5000 > area > 20:
             circularity.append(4 * np.pi * area / (perimeter ** 2))
 
     circularity = np.array(circularity)
@@ -62,8 +64,8 @@ def find_center_and_radius(cropped_image):
 
     # draw the circle on the original image
     center = (int(x), int(y))
-    cv2.circle(cropped_image, center, int(radius), (255, 0, 0), 1)
-    cv2.imwrite(f'./Test Results/{hashed_image}.png', cropped_image)
+    cv2.circle(copied_image, center, int(radius), (255, 0, 0), 1)
+    cv2.imwrite(f'./Test Results/{hashed_image}.png', copied_image)
     return (int(x), int(y)), int(radius)
 
 
@@ -81,10 +83,10 @@ def big_crop(image: np.ndarray, value: tuple, color: str) -> np.ndarray:
     """
     max_y = image.shape[0]
     max_x = image.shape[1]
-    max_x_value = min(value[1] + 65, max_x)
-    min_x_value = max(value[1] - 65, 0)
-    max_y_value = min(value[0] + 65, max_y)
-    min_y_value = max(value[0] - 65, 0)
+    max_x_value = min(value[1] + 30, max_x)
+    min_x_value = max(value[1] - 30, 0)
+    max_y_value = min(value[0] + 30, max_y)
+    min_y_value = max(value[0] - 30, 0)
 
     image = image[min_y_value:max_y_value, min_x_value:max_x_value]
 
@@ -96,8 +98,4 @@ def convert_to_1_chanel(image: np.ndarray, color: str) -> np.ndarray:
         return processing_functions.find_red_coordinates(image)
     else:
         return processing_functions.find_green_coordinates(image)
-        raise Exception("Invalid color. Expected 'r' or 'g'.")
-
-
-    return image[min_y_value:max_y_value, min_x_value:max_x_value]
 
