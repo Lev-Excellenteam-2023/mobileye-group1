@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def big_crop(image: np.ndarray, value:tuple, color: str) -> np.ndarray:
+def big_crop(image: np.ndarray, value: tuple, color: str) -> np.ndarray:
     """
     Crop the input image based on a specific value
     that's known as a location of a traffic light.
@@ -28,3 +28,21 @@ def big_crop(image: np.ndarray, value:tuple, color: str) -> np.ndarray:
         raise Exception("Invalid color. Expected 'r' or 'g'.")
     return image[min_y_value:max_y_value, min_x_value:max_x_value]
 
+
+def calculate_traffic_light_coordinates(center, radius, color):
+    right_x = center[0] + radius + (radius / 4) + 5
+    left_x = center[0] - radius - (radius / 4) - 5
+    top_y = 0
+    low_y = 0
+    if color == 'g':
+        # For green, we need to go up to include all the traffic light
+        top_y = center[1] - radius - (6 * radius) - 5
+        low_y = center[1] - radius - (radius / 4) + 5
+    elif color == 'r':
+        # For red, we need to go down to include all the traffic light
+        low_y = center[1] - radius - (radius / 4) - 5
+        top_y = center[1] + radius + (6 * radius) + 5
+    else:
+        raise ValueError("Invalid color. Please provide 'green' or 'red'.")
+
+    return left_x, right_x, top_y, low_y
