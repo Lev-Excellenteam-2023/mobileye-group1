@@ -16,6 +16,7 @@ from misc_goodies import show_image_and_gt
 from data_utils import get_images_metadata
 from crops_creator import create_crops
 import processing_functions
+import cropping_functions
 
 import tqdm  # for the progress bar
 import pandas as pd
@@ -38,17 +39,9 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # Note there are no explicit strings in the code-base. ALWAYS USE A CONSTANT VARIABLE INSTEAD!.
     """
     c_image = c_image[:410, :, :]
-    # plt.imshow(c_image)
-    # plt.show()
-
     red_image = processing_functions.find_red_coordinates(c_image)
     green_image = processing_functions.find_green_coordinates(c_image)
-    # plt.imshow(red_image)
-    # plt.show()
-    # plt.imshow(green_image)
-    # plt.show()
-    red_values = processing_functions.max_suppression(red_image, 0.47, kernel_size = 90)
-    #red_values = processing_functions.filter_red_points(c_image, red_values)
+    red_values = processing_functions.max_suppression(red_image, 0.47, kernel_size=90)
     green_values = processing_functions.max_suppression(green_image, 0.668)
     green_values = processing_functions.filter_green_points(c_image, green_values)
 
@@ -56,6 +49,11 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     y_red: List[float] = red_values[1]
     x_green: List[float] = green_values[0]
     y_green: List[float] = green_values[1]
+
+    lights_images = [cropping_functions.big_crop(c_image, tuple((x_red[i], y_red[i])), 'r') for i in range(len(x_red))]
+    for i in range(4):
+        plt.imshow(lights_images[i])
+        plt.show()
 
     if kwargs.get('debug', False):
         # This is here just so you know you can do it... Look at parse_arguments() for details
@@ -106,9 +104,9 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         # I think you will find it very very useful!
         plt.figure(f"{row[SEQ_IMAG]}: {row[NAME]} detections")
         plt.clf()
-        #plt.subplot(211, sharex=ax, sharey=ax)
+        # plt.subplot(211, sharex=ax, sharey=ax)
         plt.imshow(image)
-        #plt.title('Original image.. Always try to compare your output to it')
+        # plt.title('Original image.. Always try to compare your output to it')
         plt.title('Image with detected traffic lights')
 
         # plt.plot(tfl_x[is_red], tfl_y[is_red], 'rx', markersize=4)
@@ -116,16 +114,16 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         # Now let's convolve. Cannot convolve a 3D image with a 2D kernel, so I create a 2D image
         # Note: This image is useless for you, so you solve it yourself
 
-        #useless_image: np.ndarray = np.std(image, axis=2)  # No. You don't want this line in your code-base
-        #highpass_kernel_from_lecture: np.ndarray = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]]) - 1 / 9
-        #hp_result: np.ndarray = sg.convolve(useless_image, highpass_kernel_from_lecture, 'same')
-        #plt.subplot(212, sharex=ax, sharey=ax)
-        #plt.imshow(hp_result)
+        # useless_image: np.ndarray = np.std(image, axis=2)  # No. You don't want this line in your code-base
+        # highpass_kernel_from_lecture: np.ndarray = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]]) - 1 / 9
+        # hp_result: np.ndarray = sg.convolve(useless_image, highpass_kernel_from_lecture, 'same')
+        # plt.subplot(212, sharex=ax, sharey=ax)
+        # plt.imshow(hp_result)
         # scatter only green light
 
-        plt.scatter(attention_dict['y'],attention_dict['x'] , s=20, color = attention_dict["color"], marker='x')
-        #plt.title('Some useless image for you')
-        #plt.suptitle("When you zoom on one, the other zooms too :-)")
+        plt.scatter(attention_dict['y'], attention_dict['x'], s=20, color=attention_dict["color"], marker='x')
+        # plt.title('Some useless image for you')
+        # plt.suptitle("When you zoom on one, the other zooms too :-)")
 
         file_name = row[IMAG_PATH].split('/')[-1]
         plt.savefig('./Test Results/' + file_name)
