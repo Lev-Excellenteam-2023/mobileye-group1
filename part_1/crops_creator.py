@@ -12,7 +12,7 @@ from pandas import DataFrame
 import cropping_functions
 
 
-def make_crop(*args, **kwargs):
+def make_crop(x_values, y_values, image_paths, colors):
     """
     The function that creates the crops from the image.
     Your return values from here should be the coordinates of the crops in this format (x0, x1, y0, y1, crop content):
@@ -21,39 +21,25 @@ def make_crop(*args, **kwargs):
     'y0'  The smaller y value (the lower corner)
     'y1'  The bigger y value (the higher corner)
     """
-    x_values = [x_value for x_value in args[0]]
-    y_values = [y_value for y_value in args[1]]
-    image_paths = [image_path for image_path in args[2]]
-    colors = [color for color in args[3]]
+    image: np.ndarray = np.array(Image.open(image_paths), dtype=np.float32)
+    light_image, min_x, min_y = cropping_functions.big_crop(image, tuple((x_values, y_values)), colors)
+    center, radius = cropping_functions.find_center_and_radius(light_image)
+    center[0] = center[0] + min_x
+    center[1] = center[1] + min_y
+    left_x, right_x, low_y, top_y = cropping_functions.calculate_traffic_light_coordinates(center, radius,
+                                                                                               colors)
+    final_crop = cropping_functions.final_image_crop(image, left_x, right_x, top_y, low_y)
 
-    x0_values = []
-    x1_values = []
-    y0_values = []
-    y1_values = []
-    crops = []
-
-    for i in range(len(x_values)):
-        image: np.ndarray = np.array(Image.open(image_paths[i]), dtype=np.float32)
-        light_image: np.ndarray = cropping_functions.big_crop(image, tuple((x_values[i], y_values[i])), colors[i])
-        center, radius = cropping_functions.find_center_and_radius(light_image)
-        left_x, right_x, top_y, low_y = cropping_functions.calculate_traffic_light_coordinates(center, radius, colors[i])
-        final_crop = cropping_functions.final_image_crop(image, left_x, right_x, top_y, low_y)
-        x0_values.append(left_x)
-        x1_values.append(right_x)
-        y0_values.append(top_y)
-        y1_values.append(low_y)
-        crops.append(final_crop)
-
-    return x0_values, x1_values, y0_values, y1_values, crops
+    return left_x, right_x, low_y, top_y, final_crop
 
 
-def check_crop(*args, **kwargs):
+def check_crop(crops, x0, x1, y0, y1, json_path):
     """
     Here you check if your crop contains a traffic light or not.
     Try using the ground truth to do that (Hint: easier than you think for the simple cases, and if you found a hard
     one, just ignore it for now :). )
     """
-
+    polygons = cropping_functions.find_json_polygons(json_path)
 
     return True, True
 
@@ -83,17 +69,14 @@ def create_crops(df: DataFrame) -> DataFrame:
         result_template[COL] = row[COLOR]
 
         # example code:
-        x0, x1, y0, y1, crops = make_crop(df[X], df[Y], df[IMAG_PATH], df[COLOR])
-        for i in range(len(crops)):
-            plt.imshow(crops[i])
-            plt.show()
+        x0, x1, y0, y1, crop = make_crop(df[X][index], df[Y][index], df[IMAG_PATH][index], df[COLOR][index])
         result_template[X0], result_template[X1], result_template[Y0], result_template[Y1] = x0, x1, y0, y1
         crop_path: str = '/data/crops/my_crop_unique_name.probably_containing_the original_image_name+somthing_unique'
         # crops.save(CROP_DIR / crop_path)
         result_template[CROP_PATH] = crop_path
-        result_template[IS_TRUE], result_template[IGNOR] = check_crop(df[GTIM_PATH],
-                                                                      crops,
-                                                                      df[JSON_PATH])
+        plt.imshow(crop)
+        plt.show()
+        result_template[IS_TRUE], result_template[IGNOR] = check_crop(crop, x0, x1, y0, y1, df[JSON_PATH][index])
 
         # added to current row to the result DataFrame that will serve you as the input to part 2 B).
         result_df = result_df._append(result_template, ignore_index=True)
