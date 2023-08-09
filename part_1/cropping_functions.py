@@ -78,12 +78,15 @@ def big_crop(image: np.ndarray, value: tuple, color: str) -> np.ndarray:
 
 
 def convert_to_1_chanel(image: np.ndarray, color: str) -> np.ndarray:
+    """
+    Convert the input image to a single channel based on the specified color.
+
+    :param image: A NumPy array representing the input image.
+    :param color: A string indicating the color channel to extract ('r' or 'g').
+
+    :return: A single-channel image containing the extracted color information.
+    """
     if color == 'r':
         return processing_functions.find_red_coordinates(image)
     else:
         return processing_functions.find_green_coordinates(image)
-        raise Exception("Invalid color. Expected 'r' or 'g'.")
-
-
-    return image[min_y_value:max_y_value, min_x_value:max_x_value]
-

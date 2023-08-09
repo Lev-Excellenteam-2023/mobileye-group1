@@ -1,12 +1,26 @@
 from typing import Dict, Any
 
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+
 from consts import CROP_DIR, CROP_RESULT, SEQ, IS_TRUE, IGNOR, CROP_PATH, X0, X1, Y0, Y1, COLOR, SEQ_IMAG, COL, X, Y, \
-    GTIM_PATH
+    GTIM_PATH, IMAG_PATH
 
 from pandas import DataFrame
 
+import cropping_functions
+
 
 def make_crop(*args, **kwargs):
+    x_values = [x_value for x_value in args[0]]
+    y_values = [y_value for y_value in args[1]]
+    image_paths = [image_path for image_path in args[2]]
+    colors = [color for color in args[3]]
+    for i in range(len(x_values)):
+        image = np.array(Image.open(image_paths[i]), dtype=np.float32)
+        light_image = cropping_functions.big_crop(image, tuple((x_values[i], y_values[i])), colors[i])
+
     """
     The function that creates the crops from the image.
     Your return values from here should be the coordinates of the crops in this format (x0, x1, y0, y1, crop content):
@@ -15,6 +29,7 @@ def make_crop(*args, **kwargs):
     'y0'  The smaller y value (the lower corner)
     'y1'  The bigger y value (the higher corner)
     """
+
     return 1, 2, 3, 4, 'crop_data'
 
 
@@ -24,6 +39,8 @@ def check_crop(*args, **kwargs):
     Try using the ground truth to do that (Hint: easier than you think for the simple cases, and if you found a hard
     one, just ignore it for now :). )
     """
+
+
     return True, True
 
 
@@ -53,7 +70,7 @@ def create_crops(df: DataFrame) -> DataFrame:
 
         # example code:
         # ******* rewrite ONLY FROM HERE *******
-        x0, x1, y0, y1, crop = make_crop(df[X], df[Y], 'and_everything_else_you_need_here (and you need)')
+        x0, x1, y0, y1, crop = make_crop(df[X], df[Y], df[IMAG_PATH], df[COLOR])
         result_template[X0], result_template[X1], result_template[Y0], result_template[Y1] = x0, x1, y0, y1
         crop_path: str = '/data/crops/my_crop_unique_name.probably_containing_the original_image_name+somthing_unique'
         # crop.save(CROP_DIR / crop_path)
