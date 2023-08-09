@@ -125,3 +125,11 @@ def calculate_traffic_light_coordinates(center, radius, color):
         raise ValueError("Invalid color. Please provide 'green' or 'red'.")
 
     return left_x, right_x, top_y, low_y
+
+
+def final_image_crop(image: np.ndarray, left_x: int, right_x: int, top_y: int, low_y: int) -> np.ndarray:
+    image = image[int(low_y):int(top_y), int(left_x):int(right_x), :]
+    image = np.uint8(image)
+    plt.imshow(image)
+    plt.show()
+    return image

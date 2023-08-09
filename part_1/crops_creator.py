@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 from consts import CROP_DIR, CROP_RESULT, SEQ, IS_TRUE, IGNOR, CROP_PATH, X0, X1, Y0, Y1, COLOR, SEQ_IMAG, COL, X, Y, \
-    GTIM_PATH, IMAG_PATH
+    GTIM_PATH, IMAG_PATH, JSON_PATH
 
 from pandas import DataFrame
 
@@ -13,14 +13,6 @@ import cropping_functions
 
 
 def make_crop(*args, **kwargs):
-    x_values = [x_value for x_value in args[0]]
-    y_values = [y_value for y_value in args[1]]
-    image_paths = [image_path for image_path in args[2]]
-    colors = [color for color in args[3]]
-    for i in range(len(x_values)):
-        image = np.array(Image.open(image_paths[i]), dtype=np.float32)
-        light_image = cropping_functions.big_crop(image, tuple((x_values[i], y_values[i])), colors[i])
-
     """
     The function that creates the crops from the image.
     Your return values from here should be the coordinates of the crops in this format (x0, x1, y0, y1, crop content):
@@ -29,8 +21,30 @@ def make_crop(*args, **kwargs):
     'y0'  The smaller y value (the lower corner)
     'y1'  The bigger y value (the higher corner)
     """
+    x_values = [x_value for x_value in args[0]]
+    y_values = [y_value for y_value in args[1]]
+    image_paths = [image_path for image_path in args[2]]
+    colors = [color for color in args[3]]
 
-    return 1, 2, 3, 4, 'crop_data'
+    x0_values = []
+    x1_values = []
+    y0_values = []
+    y1_values = []
+    crops = []
+
+    for i in range(len(x_values)):
+        image: np.ndarray = np.array(Image.open(image_paths[i]), dtype=np.float32)
+        light_image: np.ndarray = cropping_functions.big_crop(image, tuple((x_values[i], y_values[i])), colors[i])
+        center, radius = cropping_functions.find_center_and_radius(light_image)
+        left_x, right_x, top_y, low_y = cropping_functions.calculate_traffic_light_coordinates(center, radius, colors[i])
+        final_crop = cropping_functions.final_image_crop(image, left_x, right_x, top_y, low_y)
+        x0_values.append(left_x)
+        x1_values.append(right_x)
+        y0_values.append(top_y)
+        y1_values.append(low_y)
+        crops.append(final_crop)
+
+    return x0_values, x1_values, y0_values, y1_values, crops
 
 
 def check_crop(*args, **kwargs):
@@ -46,8 +60,8 @@ def check_crop(*args, **kwargs):
 
 def create_crops(df: DataFrame) -> DataFrame:
     # Your goal in this part is to take the coordinates you have in the df, run on it, create crops from them, save them
-    # in the 'data' folder, then check if crop you have found is correct (meaning the TFL is fully contained in the
-    # crop) by comparing it to the ground truth and in the end right all the result data you have in the following
+    # in the 'data' folder, then check if crops you have found is correct (meaning the TFL is fully contained in the
+    # crops) by comparing it to the ground truth and in the end right all the result data you have in the following
     # DataFrame (for doc about each field and its input, look at 'CROP_RESULT')
     #
     # *** IMPORTANT ***
@@ -69,16 +83,17 @@ def create_crops(df: DataFrame) -> DataFrame:
         result_template[COL] = row[COLOR]
 
         # example code:
-        # ******* rewrite ONLY FROM HERE *******
-        x0, x1, y0, y1, crop = make_crop(df[X], df[Y], df[IMAG_PATH], df[COLOR])
+        x0, x1, y0, y1, crops = make_crop(df[X], df[Y], df[IMAG_PATH], df[COLOR])
+        for i in range(len(crops)):
+            plt.imshow(crops[i])
+            plt.show()
         result_template[X0], result_template[X1], result_template[Y0], result_template[Y1] = x0, x1, y0, y1
         crop_path: str = '/data/crops/my_crop_unique_name.probably_containing_the original_image_name+somthing_unique'
-        # crop.save(CROP_DIR / crop_path)
+        # crops.save(CROP_DIR / crop_path)
         result_template[CROP_PATH] = crop_path
         result_template[IS_TRUE], result_template[IGNOR] = check_crop(df[GTIM_PATH],
-                                                                      crop,
-                                                                      'everything_else_you_need_here')
-        # ******* TO HERE *******
+                                                                      crops,
+                                                                      df[JSON_PATH])
 
         # added to current row to the result DataFrame that will serve you as the input to part 2 B).
         result_df = result_df._append(result_template, ignore_index=True)
