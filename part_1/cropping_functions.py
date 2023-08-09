@@ -90,3 +90,30 @@ def convert_to_1_chanel(image: np.ndarray, color: str) -> np.ndarray:
         return processing_functions.find_red_coordinates(image)
     else:
         return processing_functions.find_green_coordinates(image)
+
+
+def calculate_traffic_light_coordinates(center, radius, color):
+    right_x = center[0] + radius + (radius / 4) + 5
+    left_x = center[0] - radius - (radius / 4) - 5
+    top_y = 0
+    low_y = 0
+    if color == 'g':
+        # For green, we need to go up to include all the traffic light
+        top_y = center[1] - radius - (6 * radius) - 5
+        low_y = center[1] - radius - (radius / 4) + 5
+    elif color == 'r':
+        # For red, we need to go down to include all the traffic light
+        low_y = center[1] - radius - (radius / 4) - 5
+        top_y = center[1] + radius + (6 * radius) + 5
+    else:
+        raise ValueError("Invalid color. Please provide 'green' or 'red'.")
+
+    return left_x, right_x, top_y, low_y
+
+
+def final_image_crop(image: np.ndarray, left_x: int, right_x: int, top_y: int, low_y: int) -> np.ndarray:
+    image = image[int(low_y):int(top_y), int(left_x):int(right_x), :]
+    image = np.uint8(image)
+    plt.imshow(image)
+    plt.show()
+    return image
