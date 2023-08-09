@@ -51,6 +51,9 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     y_green: List[float] = green_values[1]
 
     red_lights_images = [cropping_functions.big_crop(c_image, tuple((x_red[i], y_red[i])), 'r') for i in range(len(x_red))]
+    green_lights_images = [cropping_functions.big_crop(c_image, tuple((x_green[i], y_green[i])), 'g') for i in range(len(x_green))]
+    for image in green_lights_images:
+        cropping_functions.find_center_and_radius(image)
     # for i in range(len(x_red)):
     #     plt.imshow(lights_images[i])
     #     plt.show()
