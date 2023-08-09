@@ -52,7 +52,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
 
     red_lights_images = [cropping_functions.big_crop(c_image, tuple((x_red[i], y_red[i])), 'r') for i in range(len(x_red))]
     green_lights_images = [cropping_functions.big_crop(c_image, tuple((x_green[i], y_green[i])), 'g') for i in range(len(x_green))]
-    for image in green_lights_images:
+    for image in red_lights_images:
         cropping_functions.find_center_and_radius(image)
     # for i in range(len(x_red)):
     #     plt.imshow(lights_images[i])
@@ -129,7 +129,7 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
         # plt.suptitle("When you zoom on one, the other zooms too :-)")
 
         file_name = row[IMAG_PATH].split('/')[-1]
-        plt.savefig('./Test Results/' + file_name)
+        #plt.savefig('./Test Results/' + file_name)
 
     return attention
 
