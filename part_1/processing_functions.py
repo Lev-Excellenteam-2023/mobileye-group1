@@ -45,7 +45,7 @@ def gaussian_blur(image: np.ndarray) -> np.ndarray:
     return blurred_image
 
 
-def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_COORDINATES]:
+def find_red_coordinates(c_image: np.ndarray) -> np.ndarray:
     """
     Find coordinates of dominant red regions in an image.
 
@@ -61,7 +61,8 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
 
     for i in range(r_image.shape[0]):
         for j in range(r_image.shape[1]):
-            if (0.8 * r_image[i][j] > g_image[i][j] > 0.4 * r_image[i][j] and 0.7 * r_image[i][j] > b_image[i][j] > 0.4 * \
+            if (0.8 * r_image[i][j] > g_image[i][j] > 0.4 * r_image[i][j] and 0.7 * r_image[i][j] > b_image[i][
+                j] > 0.4 * \
                     r_image[i][j]):
                 red_image[i][j] = r_image[i][j] - g_image[i][j] / 3 - b_image[i][j] / 4
                 # check pixels around this point, if they are white, and not included in red_image, add them
@@ -72,14 +73,12 @@ def find_red_coordinates(c_image: np.ndarray) -> Tuple[RED_X_COORDINATES, RED_Y_
                             if r_image[a][b] > 0.7 and g_image[a][b] > 0.6 and b_image[a][b] > 0.6:
                                 red_image[a][b] = (r_image[a][b] - g_image[a][b] / 3 - b_image[a][b] / 4)
 
-
     blurred_image = gaussian_blur(red_image)
-
 
     return blurred_image / 255
 
 
-def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GREEN_Y_COORDINATES]:
+def find_green_coordinates(c_image: np.ndarray) -> np.ndarray:
     """
     Find coordinates of dominant green regions in an image.
 
@@ -92,19 +91,18 @@ def find_green_coordinates(c_image: np.ndarray) -> Tuple[GREEN_X_COORDINATES, GR
     b_image = c_image[:, :, 2]
     green_image = 1.5 * g_image + b_image / 2 - 1.5 * r_image
 
-    kernel = np.array([[1/25, 1/25, 1 / 25, 1/25, 1/25],
-                       [1/25, 1/25, 1 / 25, 1/25, 1/25],
-                       [1/25, 1/25, 1 / 25, 1/25, 1/25],
-                       [1/25, 1/25, 1 / 25, 1/25, 1/25],
-                       [1/25, 1/25, 1 / 25, 1/25, 1/25]])
-
-
+    kernel = np.array([[1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25],
+                       [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25],
+                       [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25],
+                       [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25],
+                       [1 / 25, 1 / 25, 1 / 25, 1 / 25, 1 / 25]])
 
     blurred_image = sg.convolve(green_image, kernel, mode='same', method='direct')
 
-    #blurred_image = gaussian_blur(green_image)
+    # blurred_image = gaussian_blur(green_image)
 
     return blurred_image / 255
+
 
 # deprecated
 # def find_traffic_light_kernel() -> np.ndarray:
@@ -129,7 +127,8 @@ def max_suppression(image: np.ndarray, min_value: float, kernel_size: int = 150)
     return values
 
 
-def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: float) -> Tuple[X_COORDINATES, Y_COORDINATES]:
+def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: float) -> Tuple[
+    X_COORDINATES, Y_COORDINATES]:
     """
     Compare an image with a maximum image and perform suppression based on a threshold.
 
@@ -147,13 +146,15 @@ def compare_max_supression(image: np.ndarray, max_image: np.ndarray, min_value: 
                 y_coordinates.append(y)
     return x_coordinates, y_coordinates
 
+
 def filter_points(values: Tuple[X_COORDINATES, Y_COORDINATES]) -> Tuple[X_COORDINATES, Y_COORDINATES]:
     values = ([value_0 for value_0, value_1 in zip(values[0], values[1]) if value_0 <= 410 and value_0 > 5],
               [value_1 for value_0, value_1 in zip(values[0], values[1]) if value_0 <= 410 and value_0 > 5])
     return values
 
 
-def filter_green_points(c_image: np.ndarray, values: Tuple[X_COORDINATES, Y_COORDINATES]) -> Tuple[X_COORDINATES, Y_COORDINATES]:
+def filter_green_points(c_image: np.ndarray, values: Tuple[X_COORDINATES, Y_COORDINATES]) -> Tuple[
+    X_COORDINATES, Y_COORDINATES]:
     """
         Filter points based on conditions involving color channels.
 

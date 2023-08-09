@@ -1,7 +1,8 @@
 import numpy as np
+import processing_functions
 
 
-def big_crop(image: np.ndarray, value:tuple, color: str) -> np.ndarray:
+def big_crop(image: np.ndarray, value: tuple, color: str) -> np.ndarray:
     """
     Crop the input image based on a specific value
     that's known as a location of a traffic light.
@@ -15,16 +16,18 @@ def big_crop(image: np.ndarray, value:tuple, color: str) -> np.ndarray:
     """
     max_y = image.shape[0]
     max_x = image.shape[1]
-    max_x_value = min(value[1] + 30, max_x)
-    min_x_value = max(value[1] - 30, 0)
+    max_x_value = min(value[1] + 65, max_x)
+    min_x_value = max(value[1] - 65, 0)
+    max_y_value = min(value[0] + 65, max_y)
+    min_y_value = max(value[0] - 65, 0)
 
+    image = image[min_y_value:max_y_value, min_x_value:max_x_value]
+
+    return convert_to_1_chanel(image, color)
+
+
+def convert_to_1_chanel(image: np.ndarray, color: str) -> np.ndarray:
     if color == 'r':
-        max_y_value = min(value[0] + 80, max_y)
-        min_y_value = max(value[0] - 30, 0)
-    elif color == 'g':
-        max_y_value = min(value[0] + 30, max_y)
-        min_y_value = max(value[0] - 80, 0)
+        return processing_functions.find_red_coordinates(image)
     else:
-        raise Exception("Invalid color. Expected 'r' or 'g'.")
-    return image[min_y_value:max_y_value, min_x_value:max_x_value]
-
+        return processing_functions.find_green_coordinates(image)
