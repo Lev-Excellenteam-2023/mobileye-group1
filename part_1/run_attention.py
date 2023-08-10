@@ -166,7 +166,7 @@ def run_on_list(meta_table: pd.DataFrame, func: callable, args: Namespace) -> pd
     return all_results
 
 
-def save_df_for_part_2(crops_df: DataFrame, results_df: DataFrame):
+def save_df_for_part_2(crops_df: DataFrame, zooms: List[float], results_df: DataFrame):
     if not ATTENTION_PATH.exists():
         ATTENTION_PATH.mkdir()
 
@@ -179,6 +179,7 @@ def save_df_for_part_2(crops_df: DataFrame, results_df: DataFrame):
     for index, row in results_sorted.iterrows():
         row_template[RELEVANT_IMAGE_PATH] = row[IMAG_PATH]
         row_template[X], row_template[Y] = row[X], row[Y]
+        row_template[ZOOM] = zooms[index]
         row_template[COL] = row[COLOR]
         attention_df = attention_df._append(row_template, ignore_index=True)
     attention_df.to_csv(ATTENTION_PATH / ATTENTION_CSV_NAME, index=False)
@@ -227,10 +228,10 @@ def main(argv=None):
     combined_df: DataFrame = pd.concat([pd.DataFrame(columns=CSV_OUTPUT), all_results], ignore_index=True)
 
     # make crops out of the coordinates from the DataFrame
-    crops_df: DataFrame = create_crops(combined_df)
+    crops_df, zooms = create_crops(combined_df)
 
     # save the DataFrames in the right format for stage two.
-    save_df_for_part_2(crops_df, combined_df)
+    save_df_for_part_2(crops_df,zooms, combined_df)
     print(f"Got a total of {len(combined_df)} results")
 
     if args.debug:

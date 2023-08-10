@@ -86,6 +86,7 @@ def create_crops(df: DataFrame) -> DataFrame:
     # A dict containing the row you want to insert into the result DataFrame.
     result_template: Dict[Any] = {SEQ: '', IS_TRUE: '', IGNOR: '', CROP_PATH: '', X0: '', X1: '', Y0: '', Y1: '',
                                   COL: ''}
+    zooms = []
     for index, row in df.iterrows():
         result_template[SEQ] = row[SEQ_IMAG]
         result_template[COL] = row[COLOR]
@@ -97,15 +98,21 @@ def create_crops(df: DataFrame) -> DataFrame:
         result_template[X0], result_template[X1], result_template[Y0], result_template[Y1] = x0, x1, y0, y1
         image_name = df[IMAG_PATH][index].split('/')
         crop_path: str = '../data/crops/' + str(index) + '_' + image_name[len(image_name) - 1]
-        os.makedirs(os.path.dirname(crop_path), exist_ok=True)
-        image_crop = Image.fromarray(crop)
-        image_crop.save(crop_path)
         result_template[CROP_PATH] = crop_path
         # plt.imshow(crop)
         # plt.show()
 
         result_template[IS_TRUE], result_template[IGNOR] = check_crop(x0, x1, y0, y1, df[JSON_PATH][index])
+        if (x1 - x0 ) * 3 == y1 - y0:
+            zooms.append(20 / (x1 - x0))
 
         # added to current row to the result DataFrame that will serve you as the input to part 2 B).
         result_df = result_df._append(result_template, ignore_index=True)
-    return result_df
+
+
+        new_crop = np.resize(crop, (60, 20, 3))
+        os.makedirs(os.path.dirname(crop_path), exist_ok=True)
+        image_crop = Image.fromarray(new_crop)
+        image_crop.save(crop_path)
+
+    return result_df, zooms
