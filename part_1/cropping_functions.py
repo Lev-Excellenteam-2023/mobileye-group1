@@ -136,16 +136,16 @@ def calculate_traffic_light_coordinates(center, radius, color):
     :return: A tuple containing the left, right, top, and low coordinates for cropping.
 
     """
-    right_x = center[0] + 2.5 * radius + (radius / 4)
-    left_x = center[0] - 2.5 * radius - (radius / 4)
+    right_x = center[0] + 2 * radius
+    left_x = center[0] - 2 * radius
     if color == 'g':
         # For green, we need to go up to include all the traffic light
-        up_y = center[1] - 2.5 * radius - (6 * radius)
-        down_y = center[1] + 2.5 * radius + (radius / 4)
+        up_y = center[1] - 2 * radius - (8 * radius)
+        down_y = center[1] + 2 * radius
     elif color == 'r':
         # For red, we need to go down to include all the traffic light
-        up_y = center[1] - 2.5 * radius - (radius / 4)
-        down_y = center[1] + 2.5 * radius + (6 * radius)
+        up_y = center[1] - 2 * radius
+        down_y = center[1] + 2 * radius + (8 * radius)
     else:
         raise ValueError("Invalid color. Please provide 'green' or 'red'.")
 
