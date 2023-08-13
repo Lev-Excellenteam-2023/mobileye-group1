@@ -63,7 +63,7 @@ def check_crop(x0, x1, y0, y1, json_path):
         #     flag =True
 
         if check_crop_helper(min_x, max_x, min_y, max_y, x0, x1, y0, y1):
-            flag =True
+            flag = True
 
     return flag, False
 
@@ -93,26 +93,23 @@ def create_crops(df: DataFrame) -> DataFrame:
         result_template[SEQ] = row[SEQ_IMAG]
         result_template[COL] = row[COLOR]
 
-
-
         # example code:
         x0, x1, y0, y1, crop = make_crop(df[X][index], df[Y][index], df[IMAG_PATH][index], df[COLOR][index])
         result_template[X0], result_template[X1], result_template[Y0], result_template[Y1] = x0, x1, y0, y1
         image_name = df[IMAG_PATH][index].split('/')
-        crop_path: str = '../data/crops/' + str(index) + '_' + image_name[len(image_name) - 1]
+        crop_path: str = str(index) + '_' + image_name[len(image_name) - 1]
         result_template[CROP_PATH] = crop_path
         # plt.imshow(crop)
         # plt.show()
 
         result_template[IS_TRUE], result_template[IGNOR] = check_crop(x0, x1, y0, y1, df[JSON_PATH][index])
-        zooms.append(20 / (x1 - x0)) if (x1 - x0 ) * 3 == y1 - y0 and x1 - x0 > 0 else zooms.append(0)
+        zooms.append(20 / (x1 - x0)) if (x1 - x0) * 3 == y1 - y0 and x1 - x0 > 0 else zooms.append(0)
 
         # added to current row to the result DataFrame that will serve you as the input to part 2 B).
         result_df = result_df._append(result_template, ignore_index=True)
 
-
         # new_crop = np.resize(crop, (60, 20, 3))
-        os.makedirs(os.path.dirname(crop_path), exist_ok=True)
+        os.makedirs(os.path.dirname('../data/crops/' + crop_path), exist_ok=True)
         image_crop = Image.fromarray(crop)
         resized_image = image_crop.resize((20, 60))
         resized_image.save(crop_path)
