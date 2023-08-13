@@ -35,16 +35,18 @@ def make_crop(x_values, y_values, image_paths, colors):
 
 def check_crop_helper(min_x, max_x, min_y, max_y, x0, x1, y0, y1):
     o1 = x0 <= min_x and x1 >= max_x and y0 <= min_y and y1 >= max_y
-    o2 = x0 > min_x and x1 < max_x and y0 > min_y and y1 < max_y
-    o3 = min_x < x0 < max_x and min_y < y0 < max_y
-    o4 = min_x < x1 < max_x and min_y < y0 < max_y
-    o5 = min_x < x1 < max_x and min_y < y1 < max_y
-    o6 = min_x < x0 < max_x and min_y < y1 < max_y
-    o7 = x0 < min_x < x1 and y0 < min_y < y1
-    o8 = x0 < max_x < x1 and y0 < min_y < y1
-    o9 = x0 < max_x < x1 and y0 < max_y < y1
-    o10 = x0 < min_x < x1 and y0 < max_y < y1
-    return o1 or o2 or o3 or o4 or o5 or o6 or o7 or o8 or o9 or o10
+    o2 = x0 >= min_x and x1 <= max_x and y0 >= min_y and y1 <= max_y
+    o3 = min_x <= x0 <= max_x and min_y <= y0 <= max_y
+    o4 = min_x <= x1 <= max_x and min_y <= y0 <= max_y
+    o5 = min_x <= x1 <= max_x and min_y <= y1 <= max_y
+    o6 = min_x <= x0 <= max_x and min_y <= y1 <= max_y
+    o7 = x0 <= min_x <= x1 and y0 <= min_y <= y1
+    o8 = x0 <= max_x <= x1 and y0 <= min_y <= y1
+    o9 = x0 <= max_x <= x1 and y0 <= max_y <= y1
+    o10 = x0 <= min_x <= x1 and y0 <= max_y <= y1
+    o11 = min_x <= x0 and x1 <= max_x and y0 <= min_y and max_y <= y1
+    o12 = min_y <= y0 and y1 <= max_y and x0 <= min_x and max_x <= x1
+    return o1 or o2 or o3 or o4 or o5 or o6 or o7 or o8 or o9 or o10 or o11 or o12
 
 
 def check_crop(x0, x1, y0, y1, json_path):
@@ -103,16 +105,16 @@ def create_crops(df: DataFrame) -> DataFrame:
         # plt.show()
 
         result_template[IS_TRUE], result_template[IGNOR] = check_crop(x0, x1, y0, y1, df[JSON_PATH][index])
-        if (x1 - x0 ) * 3 == y1 - y0:
-            zooms.append(20 / (x1 - x0))
+        zooms.append(20 / (x1 - x0)) if (x1 - x0 ) * 3 == y1 - y0 and x1 - x0 > 0 else zooms.append(0)
 
         # added to current row to the result DataFrame that will serve you as the input to part 2 B).
         result_df = result_df._append(result_template, ignore_index=True)
 
 
-        new_crop = np.resize(crop, (60, 20, 3))
+        # new_crop = np.resize(crop, (60, 20, 3))
         os.makedirs(os.path.dirname(crop_path), exist_ok=True)
-        image_crop = Image.fromarray(new_crop)
-        image_crop.save(crop_path)
+        image_crop = Image.fromarray(crop)
+        resized_image = image_crop.resize((20, 60))
+        resized_image.save(crop_path)
 
     return result_df, zooms
