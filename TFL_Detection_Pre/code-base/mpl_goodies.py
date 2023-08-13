@@ -481,7 +481,7 @@ def nn_examiner_example(scores_h5_filename=r'..\stam_output\scores.h5'):
 
 if __name__ == '__main__':
     # TODO: ...
-    nn_examiner_example(r'C:\Users\dori\Documents\SNC\code\model_0229_on_train\scores.h5')
+    nn_examiner_example(r'../data/models/logs/my_model_final_2/scores.h5')
 
     # TODO: what is this?
     # ihist_example()

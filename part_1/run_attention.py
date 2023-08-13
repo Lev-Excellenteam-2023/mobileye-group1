@@ -179,6 +179,8 @@ def save_df_for_part_2(crops_df: DataFrame, zooms: List[float], results_df: Data
     for index, row in results_sorted.iterrows():
         row_template[RELEVANT_IMAGE_PATH] = row[IMAG_PATH]
         row_template[X], row_template[Y] = row[X], row[Y]
+        # TODO: there is a bug here, you need to fix it, remove this code once it works
+        row_template[ZOOM] = 0
         row_template[ZOOM] = zooms[index]
         row_template[COL] = row[COLOR]
         attention_df = attention_df._append(row_template, ignore_index=True)

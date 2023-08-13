@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.optim as optim
-from torch.utils.data import DataLoader, WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 import consts as C  # TODO: really?
 from data_utils import TrafficLightDataSet, ModelManager, MyNeuralNetworkBase
@@ -108,7 +108,7 @@ def train_a_model(model: MyNeuralNetworkBase,
     :param num_epochs: How many rounds.. You will eventually need to raise to hundreds
     :return: Filename of last the saved model
     """
-    writer = SummaryWriter(log_dir)
+    writer = torch.utils.tensorboard.SummaryWriter(log_dir)
     metadata = None
     for ep in range(num_epochs):
         ep_time_start = datetime.datetime.now()
@@ -216,7 +216,7 @@ def main():
     model_name = 'my_model_final_2'
     train_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=True)
     test_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=False)
-    trained_model_path = go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=3)
+    trained_model_path = go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=20)
     examine_my_results(base_dir, full_images_dir, trained_model_path, test_dataset)
 
 
